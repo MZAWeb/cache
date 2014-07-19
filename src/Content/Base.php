@@ -52,6 +52,7 @@ class Base {
 
 
 	/**
+	 * ToDo
 	 * @return $this
 	 */
 	public function with_lock() {
@@ -60,7 +61,14 @@ class Base {
 		return $this;
 	}
 
+	public function append_to_key( $something ) {
+		$key = $this->cache->key();
+		$key = md5( $key . $something );
+		$this->cache->key( $key );
+	}
+
 	/**
+	 * ToDo
 	 * @return $this
 	 */
 	public function defer() {
