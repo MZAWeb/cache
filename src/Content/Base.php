@@ -65,6 +65,8 @@ class Base {
 		$key = $this->cache->key();
 		$key = md5( $key . $something );
 		$this->cache->key( $key );
+
+		return $this;
 	}
 
 	/**
