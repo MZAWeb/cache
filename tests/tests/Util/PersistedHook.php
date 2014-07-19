@@ -18,8 +18,10 @@ class PersistedHook extends \WP_UnitTestCase {
 	/**
 	 * @var \Cache\Content\Base
 	 */
-	public $base     = null;
-	public $key      = 'testing_cache_key';
+	public         $base   = null;
+	public         $key    = 'testing_cache_key';
+	private static $timers = array();
+	private static $memory = array();
 
 	public static $skip_count = 0;
 
@@ -35,6 +37,67 @@ class PersistedHook extends \WP_UnitTestCase {
 		}
 
 		delete_option( \Cache\Util\PersistedHook::RULES );
+	}
+
+	public function test_benchmark() {
+
+		$this->timer( 'add_hook' );
+		$this->memory( 'add_hook' );
+
+		new \Cache\Util\PersistedHook( 'test_benchmark', new SerializableClosure( function () {
+			return "wooot";
+		} ), 10, 1 );
+
+		echo sprintf( "\nadding 1 persisted hook took %f seconds and used %f kB memory", $this->timer( 'add_hook' ), ( $this->memory( 'add_hook' ) / 1024 ) );
+
+		$this->timer( 'register_hooks' );
+		$this->memory( 'register_hooks' );
+
+		\Cache\Util\PersistedHook::register_hooks();
+
+		echo sprintf( "\nregister_hooks for 1 persisted hook took %f seconds and used %f kB memory", $this->timer( 'register_hooks' ), ( $this->memory( 'register_hooks' ) / 1024 ) );
+
+		$qty = 10;
+
+		$this->timer( 'add_hook' );
+		$this->memory( 'add_hook' );
+
+		for ( $i = 0; $i < $qty; $i ++ ) {
+			new \Cache\Util\PersistedHook( 'test_benchmark', new SerializableClosure( function () use ( $i ) {
+				return $i;
+			} ), 10, 1 );
+		}
+
+		echo sprintf( "\nadding %d persisted hooks took %f seconds and used %f kB memory", $qty, $this->timer( 'add_hook' ), ( $this->memory( 'add_hook' ) / 1024 ) );
+
+		$this->timer( 'register_hooks' );
+		$this->memory( 'register_hooks' );
+
+		\Cache\Util\PersistedHook::register_hooks();
+
+		echo sprintf( "\nregister_hooks for %d persisted hooks took %f seconds and used %f kB memory", $qty, $this->timer( 'register_hooks' ), ($this->memory( 'register_hooks' ) / 1024) );
+
+		$qty = 1000;
+
+		$this->timer( 'add_hook' );
+		$this->memory( 'add_hook' );
+
+		for ( $i = 0; $i < $qty; $i ++ ) {
+			new \Cache\Util\PersistedHook( 'test_benchmark', new SerializableClosure( function () use ( $i ) {
+				return $i;
+			} ), 10, 1 );
+		}
+
+		echo sprintf( "\nadding %d persisted hooks took %f seconds and used %f kB memory", $qty, $this->timer( 'add_hook' ), ( $this->memory( 'add_hook' ) / 1024 ) );
+
+		$this->timer( 'register_hooks' );
+		$this->memory( 'register_hooks' );
+
+		\Cache\Util\PersistedHook::register_hooks();
+
+		echo sprintf( "\nregister_hooks for %d persisted hooks took %f seconds and used %f kB memory", $qty, $this->timer( 'register_hooks' ), ( $this->memory( 'register_hooks' ) / 1024 ) );
+
+
 	}
 
 	public function test_add_hook() {
@@ -111,6 +174,46 @@ class PersistedHook extends \WP_UnitTestCase {
 
 	public static function callable_echo_test() {
 		echo 'wooot';
+	}
+
+
+	public function timer( $key, $log = false ) {
+		if ( ! isset( self::$timers[ $key ] ) ) {
+			$time                 = microtime();
+			$time                 = explode( ' ', $time );
+			$time                 = $time[1] + $time[0];
+			self::$timers[ $key ] = $time;
+
+			return false;
+
+		} else {
+			$time       = microtime();
+			$time       = explode( ' ', $time );
+			$time       = $time[1] + $time[0];
+			$finish     = $time;
+			$total_time = round( ( $finish - self::$timers[ $key ] ), 4 );
+
+			unset( self::$timers[ $key ] );
+
+			return $total_time;
+		}
+	}
+
+
+	public function memory( $key, $log = false ) {
+		if ( ! isset( self::$memory[ $key ] ) ) {
+			$memory               = memory_get_usage();
+			self::$memory[ $key ] = $memory;
+
+			return false;
+		} else {
+			$memory       = memory_get_usage();
+			$total_memory = $memory - self::$memory[ $key ];
+
+			unset( self::$memory[ $key ] );
+
+			return $total_memory;
+		}
 	}
 
 

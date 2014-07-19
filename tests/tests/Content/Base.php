@@ -111,13 +111,22 @@ class Base extends \WP_UnitTestCase {
 	 * Base objets should allow to refresh content
 	 */
 	public function test_should_be_able_to_refresh() {
-		$base        = new \Cache\Content\Base( $this->cache );
+		$base = new \Cache\Content\Base( $this->cache );
 
 		$first_value = (string) $base;
 		$base->refresh();
 		$second_value = (string) $base;
 
 		$this->assertNotEquals( $first_value, $second_value, "Cache value should be refreshed" );
+	}
+
+	public function test_append_to_key() {
+		$base = new \Cache\Content\Base( $this->cache );
+		$key1 = $base->cache->key();
+		$base->append_to_key( true );
+		$key2 = $base->cache->key();
+
+		$this->assertNotEquals( $key1, $key2 );
 	}
 
 	/**
