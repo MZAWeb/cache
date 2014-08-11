@@ -126,8 +126,14 @@ class PersistedHook {
 
 					$callable = get_option( 'cache_' . $hook . '_' . $key );
 					$callable = @unserialize( $callable );
-					$value    = call_user_func_array( $callable, func_get_args() );
-					$skip     = apply_filters( 'persisted_hook_skip_remove', false, $key );
+
+					$value = null;
+
+					if ( is_callable( $callable ) ) {
+						$value = call_user_func_array( $callable, func_get_args() );
+					}
+
+					$skip = apply_filters( 'persisted_hook_skip_remove', false, $key );
 					
 					if ( ! $skip ) {
 						self::remove_hook( $hook, $key );
