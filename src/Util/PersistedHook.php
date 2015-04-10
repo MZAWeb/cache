@@ -96,7 +96,7 @@ class PersistedHook {
 		}
 	}
 
-	protected static function remove_hook( $hook, $key ) {
+	public static function remove_hook( $hook, $key ) {
 
 		$rules = get_option( self::RULES, array() );
 
@@ -107,6 +107,27 @@ class PersistedHook {
 
 		if ( empty( $rules[ $hook ] ) ) {
 			unset( $rules[ $hook ] );
+		}
+
+		update_option( self::RULES, $rules );
+	}
+
+	public static function remove_hook_by_key( $key ) {
+
+		$rules = get_option( self::RULES, array() );
+
+		foreach ( $rules as $hook => $keys ) {
+
+			if ( ! array_key_exists( $key, $keys ) ) {
+				continue;
+			}
+
+			unset( $rules[ $hook ][ $key ] );
+			delete_option( 'cache_' . $hook . '_' . $key );
+
+			if ( empty( $rules[ $hook ] ) ) {
+				unset( $rules[ $hook ] );
+			}
 		}
 
 		update_option( self::RULES, $rules );
@@ -130,7 +151,13 @@ class PersistedHook {
 					$value = null;
 
 					if ( is_callable( $callable ) ) {
-						$value = call_user_func_array( $callable, func_get_args() );
+
+						try {
+							$value = call_user_func_array( $callable, func_get_args() );
+						} catch ( \Exception $e ) {
+							error_log( print_r( $e->getMessage(), true ) );
+						}
+
 					}
 
 					$skip = apply_filters( 'persisted_hook_skip_remove', false, $key );

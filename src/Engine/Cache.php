@@ -8,6 +8,8 @@
 
 namespace Cache\Engine;
 
+use Cache\Util\PersistedHook;
+
 class Cache {
 
 	/**
@@ -85,8 +87,11 @@ class Cache {
 	public function get() {
 		
 		$content = $this->engine->get( $this->key );
-		
+
+
 		if ( $content === false ) {
+
+			PersistedHook::remove_hook_by_key( $this->key );
 
 			if ( $this->defer ) {
 				add_action( 'shutdown', array( $this, '_generate' ) );

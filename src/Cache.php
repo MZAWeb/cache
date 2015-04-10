@@ -61,14 +61,12 @@ class Cache {
 	/**
 	 * Caches a call to dynamic_sidebar
 	 *
-	 * NOT IMPLEMENTED YET
-	 *
 	 * @param int|string $index Same as you'd pass to dynamic_sidebar
 	 *
 	 * @return \Cache\Content\Sidebar
 	 */
 	public static function sidebar( $index = 1 ) {
-		$key   = 'sidebar-' . $index;
+		$key   = md5( 'sidebar-' . $index );
 		$arg   = array( $index );
 		$cache = new \Cache\Engine\Cache( $key, 'dynamic_sidebar', $arg );
 
