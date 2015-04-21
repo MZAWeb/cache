@@ -1,5 +1,17 @@
 {
-    "require": {
-        "jeremeamia/superclosure": "~1.0"
+  "name": "moderntribe/cache",
+  "type": "wordpress-plugin",
+  "description": "Modern Tribe Cache Helper",
+  "license": "GPLv2",
+  "authors": [
+    {
+      "name": "Daniel Dvorkin",
+      "email": "daniel@tri.be"
     }
+  ],
+  "minimum-stability": "dev",
+  "require": {
+    "composer/installers": "~1.0",
+    "jeremeamia/superclosure": "~1.0"
+  }
 }
